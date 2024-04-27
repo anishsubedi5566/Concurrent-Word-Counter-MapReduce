@@ -14,15 +14,15 @@ func main() {
 		"my name is Anish",
 	}
 
-	//Creating a intermediate value to store map result: [[This: 1, is:1, my:1, name:1], [my: 1, name: 1, is:1....]...]
-
 	//Map Part
+	//Creating a intermediate value to store map result: [[This: 1, is:1, my:1, name:1], [my: 1, name: 1, is:1....]...]
 	mapResult := &[]map[string]int{}
-	wg := &sync.WaitGroup{}
-	mut := &sync.RWMutex{}
+	wg := &sync.WaitGroup{} //Pointer for threads
+	mut := &sync.RWMutex{}  //Locking the common mapResult while each thread updates it
 
 	for _, each := range listOfSentence {
 		wg.Add(1)
+		//Call a go routine for each sentense and update final result to mapResult
 		go func(wg *sync.WaitGroup, mut *sync.RWMutex, mapResult *[]map[string]int, each string) {
 			defer wg.Done()
 			eachList := strings.Split(each, " ")
@@ -41,9 +41,10 @@ func main() {
 	wg.Wait()
 
 	// Reducer part
-	finalResult := make(map[string]int)
+	finalResult := make(map[string]int) //Store the final result
 	for _, each := range *mapResult {
 		wg.Add(1)
+		//call a go routine to update each map result
 		go func(wg *sync.WaitGroup, mut *sync.RWMutex, each map[string]int, finalResult map[string]int) {
 			defer wg.Done()
 			for key, value := range each {
